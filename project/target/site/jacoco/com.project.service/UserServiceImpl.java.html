@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">project</a> &gt; <a href="index.source.html" class="el_package">com.project.service</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.project.service;
+
+import java.util.List;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import com.project.dao.UserDao;
+import com.project.dto.UserRequest;
+import com.project.entity.User;
+import com.project.exception.UserNotFoundException;
+import com.project.utils.Constants;
+
+import lombok.extern.slf4j.Slf4j;
+
+
+<span class="fc" id="L20">@Slf4j</span>
+@Service
+<span class="fc" id="L22">public class UserServiceImpl implements UserService {</span>
+	
+    @Autowired
+    UserDao dao;
+
+    @Value(&quot;${admin.username}&quot;)
+    private String adminUsername;
+
+    @Override
+    public ResponseEntity&lt;User&gt; addUser(UserRequest req) {
+
+<span class="fc" id="L33">        log.info(&quot;inserting the user {}&quot;, req);</span>
+<span class="fc" id="L34">        User user = new User();</span>
+<span class="fc" id="L35">        BeanUtils.copyProperties(req, user);</span>
+<span class="fc" id="L36">        User response = dao.save(user);</span>
+<span class="fc" id="L37">        log.info(Constants.RESPONSE, response);</span>
+<span class="fc" id="L38">        return ResponseEntity.ok(response);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;List&lt;User&gt;&gt; getAllUsers() {
+
+<span class="fc" id="L44">        log.info(&quot;admin username : &quot;+ adminUsername);</span>
+<span class="fc" id="L45">        List&lt;User&gt; users = dao.findAll();</span>
+<span class="fc" id="L46">        log.info(&quot;List of Users: &quot;, users);</span>
+<span class="fc" id="L47">        return ResponseEntity.ok(users);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;User&gt; getUserById(int id) {
+
+<span class="fc" id="L53">        log.info(Constants.REQUEST, id);</span>
+<span class="fc" id="L54">        User user = new User();</span>
+        try {
+<span class="fc" id="L56">            user = dao.findById(id).get();</span>
+<span class="fc" id="L57">            log.info(Constants.RESPONSE, id);</span>
+<span class="fc" id="L58">            return ResponseEntity.ok(user);</span>
+<span class="fc" id="L59">        } catch (Exception e) {</span>
+<span class="fc" id="L60">            log.error(Constants.USERNOTFOUND + id);</span>
+<span class="fc" id="L61">            throw new UserNotFoundException(Constants.USERNOTFOUND);</span>
+        }
+    }
+
+    @Override
+    public ResponseEntity&lt;User&gt; updateUser(int id, UserRequest req) {
+
+<span class="fc" id="L68">        log.info(&quot;Updating the user {}&quot;, id, req);</span>
+        try {
+<span class="fc" id="L70">            User user = dao.findById(id).get();</span>
+<span class="fc" id="L71">            BeanUtils.copyProperties(req, user);</span>
+<span class="fc" id="L72">            user = dao.save(user);</span>
+<span class="fc" id="L73">            log.info(Constants.RESPONSE,user);</span>
+<span class="fc" id="L74">            return ResponseEntity.ok(user);</span>
+<span class="fc" id="L75">        } catch (Exception e) {</span>
+<span class="fc" id="L76">            log.error(Constants.USERNOTFOUND , id);</span>
+<span class="fc" id="L77">            throw new UserNotFoundException(Constants.USERNOTFOUND);</span>
+        }
+
+    }
+
+    @Override
+    public ResponseEntity&lt;String&gt; deleteUser(int id) {
+
+<span class="fc" id="L85">        log.info(&quot;Deleting the user {}&quot;,id);</span>
+        try{
+<span class="fc" id="L87">            dao.findById(id).get();</span>
+<span class="fc" id="L88">            dao.deleteById(id);</span>
+<span class="fc" id="L89">            log.info(&quot;Deleted successfully&quot;);</span>
+<span class="fc" id="L90">            return ResponseEntity.ok(&quot;Deleted&quot;);</span>
+<span class="fc" id="L91">        }catch (Exception e){</span>
+<span class="fc" id="L92">            log.error(Constants.USERNOTFOUND + &quot; for id : &quot; + id);</span>
+<span class="fc" id="L93">            throw new UserNotFoundException(Constants.USERNOTFOUND);</span>
+        }
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
